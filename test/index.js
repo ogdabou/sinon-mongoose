@@ -81,30 +81,51 @@ describe('sinon-mongoose', function() {
   });
 
   describe('using sinon sandbox', function() {
-    var sandbox = sinon.sandbox.create();
-
-    afterEach(function() {
-      sandbox.verify();
-      sandbox.restore();
-    });
-
-    it('should work mocking Model', function() {
-      var BookMock = sandbox.mock(Book);
-
-      BookMock.expects('find').withArgs('SOME_ARGUMENTS').chain('exec').resolves('RESULT');
-
-      Book.find('SOME_ARGUMENTS').exec().then(function(result) {
-        assert.equal(result, 'RESULT');
+    describe('restore', function() {
+      it('should restore sinon.sandbox', () => {
+        var sandbox = sinon.sandbox.create();
+        var BookMock = sandbox.mock(Book);
+        BookMock.expects('find')
+          .withArgs('SOME_ARGUMENTS')
+          .chain('exec')
+          .resolves('RESULT');
+        sandbox.verify();
+        sandbox.restore();
+        sandbox = sinon.sandbox.create();
+        var BookMock2 = sandbox.mock(Book);
+        BookMock2.expects('find')
+          .withArgs('SOME_ARGUMENTS')
+          .chain('exec')
+          .resolves('RESULT');
       });
     });
 
-    it('should work mocking Document', function() {
-      var bookMock = sandbox.mock(new Book({ title: 'Rayuela' }));
+    describe('mocking', () => {
+      var sandbox = sinon.sandbox.create();
 
-      bookMock.expects('update').withArgs('SOME_ARGUMENTS').chain('exec').resolves('RESULT');
+      afterEach(function() {
+        sandbox.verify();
+        sandbox.restore();
+      });
 
-      bookMock.object.update('SOME_ARGUMENTS').exec().then(function(result) {
-        assert.equal(result, 'RESULT');
+      it('should work mocking Model', function() {
+        var BookMock = sandbox.mock(Book);
+
+        BookMock.expects('find').withArgs('SOME_ARGUMENTS').chain('exec').resolves('RESULT');
+
+        Book.find('SOME_ARGUMENTS').exec().then(function(result) {
+          assert.equal(result, 'RESULT');
+        });
+      });
+
+      it('should work mocking Document', function() {
+        var bookMock = sandbox.mock(new Book({ title: 'Rayuela' }));
+
+        bookMock.expects('update').withArgs('SOME_ARGUMENTS').chain('exec').resolves('RESULT');
+
+        bookMock.object.update('SOME_ARGUMENTS').exec().then(function(result) {
+          assert.equal(result, 'RESULT');
+        });
       });
     });
   });
